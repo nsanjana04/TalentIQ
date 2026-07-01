@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy checklist reminder
+        run: |
+          echo "Before deploying, verify:"
+          echo "  - docs/PRODUCTION_CHECKLIST.md completed"
+          echo "  - docs/LAUNCH_CHECKLIST.md completed"
+          echo "  - Secrets configured in target environment"
+          echo "  - Database migrations applied"
+
+      - name: Build Docker image
+        run: docker build --target production -t talentiq:deploy .
+
+      # Add your deployment target steps below (ECS, K8s, VM, etc.)
+      - name: Deployment placeholder
+        run: echo "Wire this job to your infrastructure (ECS, Kubernetes, VM, Vercel)"

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_ENV: test
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  DATABASE_URL: postgresql://talentiq:talentiq@localhost:5432/talentiq?schema=public
+  JWT_ACCESS_SECRET: ci-access-secret-minimum-32-characters-long
+  JWT_REFRESH_SECRET: ci-refresh-secret-minimum-32-characters-long
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: talentiq
+          POSTGRES_PASSWORD: talentiq
+          POSTGRES_DB: talentiq
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U talentiq -d talentiq"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build production Docker image
+        run: docker build --target production -t talentiq:${{ github.sha }} .

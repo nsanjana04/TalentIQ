@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --rm-primary: #0b3b75;
+  --rm-secondary: #154c9e;
+  --rm-accent: #2f80ed;
+  --rm-navy: #0b3b75;
+  --rm-bg: #f8fafc;
+  --rm-success: #27ae60;
+  --rm-warning: #f2994a;
+  --rm-danger: #eb5757;
+
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --primary: #0b3b75;
+  --primary-foreground: #ffffff;
+  --secondary: #154c9e;
+  --secondary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e8f1fd;
+  --accent-foreground: #0b3b75;
+  --destructive: #eb5757;
+  --destructive-foreground: #ffffff;
+  --success: #27ae60;
+  --success-foreground: #ffffff;
+  --warning: #f2994a;
+  --warning-foreground: #0f172a;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2f80ed;
+  --sidebar: #071e34;
+  --sidebar-foreground: #e8edf3;
+  --sidebar-accent: #154c9e;
+  --sidebar-muted: #94a3b8;
+  --chart-1: #0b3b75;
+  --chart-2: #27ae60;
+  --chart-3: #f2994a;
+  --chart-4: #2f80ed;
+  --chart-5: #eb5757;
+}
+
+.dark {
+  --background: #050f1a;
+  --foreground: #e8edf3;
+  --card: #0a1a2e;
+  --card-foreground: #e8edf3;
+  --primary: #3d7ec4;
+  --primary-foreground: #ffffff;
+  --secondary: #122640;
+  --secondary-foreground: #e8edf3;
+  --muted: #122640;
+  --muted-foreground: #9fb0c4;
+  --accent: #152d4d;
+  --accent-foreground: #7eb3e8;
+  --destructive: #e05a5a;
+  --destructive-foreground: #ffffff;
+  --success: #00c47d;
+  --success-foreground: #071e34;
+  --warning: #ffc44d;
+  --warning-foreground: #071e34;
+  --border: #1a3050;
+  --input: #1a3050;
+  --ring: #3d7ec4;
+  --sidebar: #030a12;
+  --sidebar-foreground: #c8d6e5;
+  --sidebar-accent: #3d7ec4;
+  --sidebar-muted: #6b8299;
+  --chart-1: #3d7ec4;
+  --chart-2: #00c47d;
+  --chart-3: #ffc44d;
+  --chart-4: #7eb3e8;
+  --chart-5: #e05a5a;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-navy: var(--rm-navy);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-card: 1rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .enterprise-panel {
+    @apply rounded-2xl border border-border bg-card shadow-sm;
+  }
+
+  .enterprise-panel-elevated {
+    @apply rounded-2xl border border-border/40 bg-card shadow-md;
+  }
+
+  .command-gradient {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 4%, var(--background)) 0%,
+      var(--background) 50%,
+      color-mix(in srgb, var(--success) 3%, var(--background)) 100%
+    );
+  }
+
+  .sidebar-gradient {
+    background: linear-gradient(180deg, var(--sidebar) 0%, color-mix(in srgb, var(--sidebar) 85%, #000) 100%);
+  }
+
+  .glass-header {
+    @apply border-b border-border/60 bg-card/80 backdrop-blur-md;
+  }
+
+  .metric-glow-success {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--success) 20%, transparent),
+      0 4px 24px color-mix(in srgb, var(--success) 8%, transparent);
+  }
+
+  .metric-glow-warning {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--warning) 20%, transparent),
+      0 4px 24px color-mix(in srgb, var(--warning) 8%, transparent);
+  }
+
+  .metric-glow-danger {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--destructive) 20%, transparent),
+      0 4px 24px color-mix(in srgb, var(--destructive) 8%, transparent);
+  }
+
+  .heatmap-cell-0 { @apply bg-muted; }
+  .heatmap-cell-1 { background-color: color-mix(in srgb, var(--chart-1) 20%, var(--card)); }
+  .heatmap-cell-2 { background-color: color-mix(in srgb, var(--chart-1) 40%, var(--card)); }
+  .heatmap-cell-3 { background-color: color-mix(in srgb, var(--chart-1) 60%, var(--card)); }
+  .heatmap-cell-4 { background-color: color-mix(in srgb, var(--chart-1) 80%, var(--card)); }
+  .heatmap-cell-5 { background-color: color-mix(in srgb, var(--chart-2) 70%, var(--card)); }
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .certificate-print-root,
+  .certificate-print-root * {
+    visibility: visible;
+  }
+
+  .certificate-print-root {
+    position: static !important;
+    width: 100% !important;
+    max-width: 10.5in !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
