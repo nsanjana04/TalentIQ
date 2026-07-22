@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: talentiq-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-talentiq}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_DB: ${POSTGRES_DB:-talentiq}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-talentiq} -d ${POSTGRES_DB:-talentiq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - talentiq
+
+  redis:
+    image: redis:7-alpine
+    container_name: talentiq-redis-prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - talentiq
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
+    container_name: talentiq-migrate-prod
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-talentiq}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-talentiq}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - talentiq
+    command: ["npx", "prisma", "db", "push", "--skip-generate"]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: talentiq-app-prod
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-talentiq}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-talentiq}?schema=public
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:?NEXT_PUBLIC_APP_URL required}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET required}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - talentiq
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  talentiq:
+    driver: bridge
